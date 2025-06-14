@@ -12,7 +12,7 @@ class Point:
         from config import WINSIZE, WINCENTER
         center_x = WINCENTER[0]
         center_y = WINCENTER[1]
-        PIXELS_PER_UNIT = 50
+        PIXELS_PER_UNIT = 10
         return (center_x+self.x * PIXELS_PER_UNIT, center_y-self.y * PIXELS_PER_UNIT)
 
 

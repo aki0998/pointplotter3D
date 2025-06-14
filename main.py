@@ -6,8 +6,7 @@ from config import WINSIZE, WINCENTER
 from graph import Graph
 from models.point import Point
 
-points = [Point(0,0), Point(1,1)]
-new_graph = Graph(points)
+
 
 # constants
 
@@ -19,10 +18,13 @@ def main():
     # initialize and prepare screen
     pg.init()
     screen = pg.display.set_mode(WINSIZE)
+
     pg.display.set_caption("pygame Point Plotter 3D")
     white = 255, 240, 200
     black = 20, 20, 40
     screen.fill(white)
+    points = [Point(0, 0), Point(1, 1)]
+    new_graph = Graph(points,screen)
 
     clock = pg.time.Clock()
 
@@ -32,8 +34,7 @@ def main():
         # draw_stars(screen, stars, black) #
         # move_stars(stars)
         # draw_stars(screen, stars, white)
-        for point in points:
-            point.draw(screen)
+        new_graph.draw()
         pg.display.update()
         for e in pg.event.get():
             if e.type == pg.QUIT or (e.type == pg.KEYUP and e.key == pg.K_ESCAPE):
