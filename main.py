@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 "Creating a basic 2D environment for now to create a point "
-import random
-import math
 import pygame as pg
+
+from config import WINSIZE, WINCENTER
 from graph import Graph
 from models.point import Point
 
-points = [Point(1,1)]
+points = [Point(0,0), Point(1,1)]
 new_graph = Graph(points)
 
 # constants
-WINSIZE = [640, 480]
-WINCENTER = [320, 240]
 
 
 def main():
