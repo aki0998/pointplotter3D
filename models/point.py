@@ -50,7 +50,9 @@ class Point:
         x,y = pygame.mouse.get_pos() #stores these x and y coordinates into a variable
         a,b = self.get_position()
         distance = ((a-x)**2 + (b-y)**2)**0.5
-        return distance*self.graph.pixels_per_unit <= self.radius #tells if the mouse is on top of the point
+        return distance <= self.radius #tells if the mouse is on top of the point
+
+
 
 
 
