@@ -20,6 +20,26 @@ class Point:
     def draw(self):
         import pygame
         pygame.draw.circle(self.graph.screen, (0,0,0), self.get_position(), self.radius)
+        # create a font object.
+        # 1st parameter is the font file
+        # which is present in pygame.
+        # 2nd parameter is size of the font
+        font = pygame.font.Font('freesansbold.ttf', 32)
+
+        # create a text surface object,
+        # on which text is drawn on it.
+        text = font.render(f'{self.x},{self.y},{self.z}', True, (0,0,0), (255,255,255))
+
+        # create a rectangular object for the
+        # text surface object
+        textRect = text.get_rect()
+
+        # set the center of the rectangular object.
+        x,y = self.get_position()
+        textRect.center = (x-20, y-20)
+        if self.mouse_intersection():
+            self.graph.screen.blit(text, textRect)
+
 
     def get_position(self):
         center_x = self.graph.width//2
