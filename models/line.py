@@ -9,7 +9,7 @@ class Line(Drawable):
 
 
     def draw(self):
-        pg.draw.line(self.graph.screen, (200, 0, 0), self.start_point.get_position(), self.end_point.get_position(), 2)
+        pg.draw.line(self.graph.screen, (200, 0, 0), self.start_point.get_position(), self.end_point.get_position   (), 2)
 
 
 

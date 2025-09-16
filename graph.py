@@ -97,7 +97,12 @@ class Graph(Drawable):
         return self.width // 2 + x * self.pixels_per_unit, self.height // 2 - y * self.pixels_per_unit
 
     def add_line_segment(self, x1, y1, x2, y2):
-        self.lines.append(Line(self, Point(x1, y1, 0, self), Point(x2, y2, 0, self)))
+        start_point = Point(x1, y1, 0, self)
+        end_point = Point(x2, y2, 0, self)
+        self.lines.append(Line(self, start_point, end_point))
+        self.points.append(start_point)
+        self.points.append(end_point)
+
 
     def draw_lines(self):
         for line in self.lines:
