@@ -1,7 +1,10 @@
+
 import pygame.mouse
 
+from models.interfaces.drawable import Drawable
+
 PIXELS_PER_UNIT = 10
-class Point:
+class Point(Drawable):
     def __init__(self, x: float, y: float, z: float = 0, graph=None,radius = 4):
         self.x = x
         self.y = y
