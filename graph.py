@@ -72,6 +72,11 @@ class Graph(Drawable):
                 elif e.type == pg.MOUSEBUTTONUP:
                     if e.button == 1:
                         self.selected_point = None
+                elif e.type == pg.MOUSEWHEEL:
+                    if e.y == 1:
+                        self.pixels_per_unit = self.pixels_per_unit * 1.1
+                    elif e.y == -1:
+                        self.pixels_per_unit *= 0.90
                 elif e.type == pg.KEYDOWN and e.key == pg.K_i:  # NEW
                         self.prompt_for_input()
 
@@ -141,6 +146,8 @@ class Graph(Drawable):
             self.tk_root.withdraw()
         s = simpledialog.askstring("Add point/line", "Enter (x,y) - Coordinate  or  (x1,y1) (x2,y2) - A line will connect between those two points")
         if s: print(self.parse_input_string_simple(s))
+
+
 
 
 

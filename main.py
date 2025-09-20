@@ -23,7 +23,7 @@ def main():
     graph.add_point(1,1)
     graph.run()
 
-# So `python -m pygame.example.stars` will work.
+
 if __name__ == "__main__":
     main()
 

@@ -47,7 +47,7 @@ class Point(Drawable):
     def get_position(self):
         center_x = self.graph.width//2
         center_y = self.graph.height//2
-        return center_x + self.x *self.graph.pixels_per_unit , center_y - self.y * self.graph.pixels_per_unit
+        return center_x + self.x *self.graph.pixels_per_unit, center_y - self.y * self.graph.pixels_per_unit
 
     def mouse_intersection(self):
         x,y = pygame.mouse.get_pos() #stores these x and y coordinates into a variable
