@@ -26,11 +26,13 @@ class Graph(Drawable):
         self.selected_point = None
         self.lines = []  # store ((x1,y1),(x2,y2)) segments
         self.tk_root = None  # Tk root for the dialog
+        self.max_zoom = 10
+        self.min_zoom = 0.1
+        self.default_ppu = pixels_per_unit
 
     def draw_axes(self):
-        from config import SCREEN_WIDTH, SCREEN_HEIGHT
-        pg.draw.line(self.screen, (0, 0, 0),(SCREEN_WIDTH/2 , 0), (SCREEN_WIDTH/2 , SCREEN_HEIGHT))
-        pg.draw.line(self.screen, (0, 0, 0),( 0,SCREEN_HEIGHT/2), (SCREEN_WIDTH , SCREEN_HEIGHT/2))
+        pg.draw.line(self.screen, (0, 0, 0),(self.width/2 , 0), (self.width/2 , self.height))
+        pg.draw.line(self.screen, (0, 0, 0),( 0,self.height/2), (self.width , self.height/2))
 
     def draw(self):
         for point in self.points:
@@ -73,10 +75,12 @@ class Graph(Drawable):
                     if e.button == 1:
                         self.selected_point = None
                 elif e.type == pg.MOUSEWHEEL:
-                    if e.y == 1:
-                        self.pixels_per_unit = self.pixels_per_unit * 1.1
+                    if e.y == 1:#
+                        if self.pixels_per_unit < self.default_ppu*self.max_zoom:
+                            self.pixels_per_unit *= 1.1
                     elif e.y == -1:
-                        self.pixels_per_unit *= 0.90
+                        if self.pixels_per_unit > self.default_ppu*self.min_zoom:
+                            self.pixels_per_unit *= 0.90
                 elif e.type == pg.KEYDOWN and e.key == pg.K_i:  # NEW
                         self.prompt_for_input()
 
