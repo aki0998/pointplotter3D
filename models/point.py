@@ -31,7 +31,7 @@ class Point(Drawable):
 
         # create a text surface object,
         # on which text is drawn on it.
-        text = font.render(f'{self.x},{self.y},{self.z}', True, (0,0,0), (255,255,255))
+        text = font.render(f'{round(self.x, 2)},{round(self.y, 2)},{round(self.z, 2)}', True, (0,0,0), (255,255,255))
 
         # create a rectangular object for the
         # text surface object
