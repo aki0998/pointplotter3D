@@ -2,6 +2,7 @@
 import pygame.mouse
 
 from models.interfaces.drawable import Drawable
+from utils import display_text
 
 PIXELS_PER_UNIT = 10
 class Point(Drawable):
@@ -17,31 +18,15 @@ class Point(Drawable):
         self.y = y
 
 
-
-
-
     def draw(self):
         import pygame
         pygame.draw.circle(self.graph.screen, (0,0,0), self.get_position(), self.radius)
-        # create a font object.
-        # 1st parameter is the font file
-        # which is present in pygame.
-        # 2nd parameter is size of the font
-        font = pygame.font.Font('freesansbold.ttf', 32)
+        x, y = self.get_position()
 
-        # create a text surface object,
-        # on which text is drawn on it.
-        text = font.render(f'{round(self.x, 2)},{round(self.y, 2)},{round(self.z, 2)}', True, (0,0,0), (255,255,255))
-
-        # create a rectangular object for the
-        # text surface object
-        textRect = text.get_rect()
-
-        # set the center of the rectangular object.
-        x,y = self.get_position()
-        textRect.center = (x-20, y-20)
         if self.mouse_intersection():
-            self.graph.screen.blit(text, textRect)
+            display_text(f'{round(self.x, 2)},{round(self.y, 2)},{round(self.z, 2)}', (x - 20, y - 20),self.graph.screen)
+
+
 
 
     def get_position(self):
@@ -54,6 +39,17 @@ class Point(Drawable):
         a,b = self.get_position()
         distance = ((a-x)**2 + (b-y)**2)**0.5
         return distance <= self.radius #tells if the mouse is on top of the point
+
+    def to_json(self):
+        return [self.x ,self.y ,self.z]
+
+    @classmethod #not an object just for the class (decorator)
+    def from_json(cls, coordinates, graph):
+        [x, y, z] = coordinates
+        return Point(x,y,z,graph=graph)
+
+
+
 
 
 

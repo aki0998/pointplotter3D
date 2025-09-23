@@ -18,7 +18,7 @@ def main():
 
     # initialize and prepare screen
     pg.init()
-    graph = Graph(points=[], width= WINSIZE[0], height = WINSIZE[1])
+    graph = Graph.load_graph()
     graph.add_point(0,0)
     graph.add_point(1,1)
     graph.run()

@@ -4,6 +4,10 @@ import pygame as pg
 from models.point import Point
 from models.line import Line
 import math
+import json
+import os
+
+from config import WINSIZE, WINCENTER
 from utils import display_text
 
 try:
@@ -19,18 +23,19 @@ from models.interfaces.drawable import Drawable
 
 
 class Graph(Drawable):
-    def __init__(self, points = None,width = 1000,height = 1000,pixels_per_unit = 10):
-        self.points=points
+    def __init__(self, points = None, lines = None, width = 1000,height = 1000,pixels_per_unit = 10):
+        self.points = points or []
+        self.lines = lines or []
         self.screen= pg.display.set_mode((width,height))
         self.width = width
         self.height = height
         self.pixels_per_unit = pixels_per_unit #this represents how many pixels will be one unit in the graph
         self.selected_point = None
-        self.lines = []  # store ((x1,y1),(x2,y2)) segments
         self.tk_root = None  # Tk root for the dialog
         self.max_zoom = 10
         self.min_zoom = 0.1
         self.default_ppu = pixels_per_unit
+
 
     def draw_axes(self):
         pg.draw.line(self.screen, (0, 0, 0),(self.width/2 , 0), (self.width/2 , self.height))
@@ -103,10 +108,17 @@ class Graph(Drawable):
                         for point in self.points:
                             if point.mouse_intersection():
 
-
                                 self.selected_point = point
                                 print("point ",point," has been selected")
                                 break
+                        for line in self.lines:
+                            if line.start_point.mouse_intersection():
+                                self.selected_point = line.start_point
+                                # print("point ", point, " has been selected")
+                            if line.end_point.mouse_intersection():
+                                self.selected_point = line.end_point
+                                # print("point ", point, " has been selected")
+
                 elif e.type == pg.MOUSEBUTTONUP:
                     if e.button == 1:
                         self.selected_point = None
@@ -116,9 +128,13 @@ class Graph(Drawable):
                             self.pixels_per_unit *= 1.1
                     elif e.y == -1:
                         if self.pixels_per_unit > self.default_ppu*self.min_zoom:
-                            self.pixels_per_unit *= 0.90
-                elif e.type == pg.KEYDOWN and e.key == pg.K_i:  # NEW
+                            self.pixels_per_unit *= 0.9
+                elif e.type == pg.KEYDOWN:
+                    if e.key == pg.K_i:  # NEW
                         self.prompt_for_input()
+                    elif e.key == pg.K_s and pg.key.get_mods() & pg.KMOD_CTRL:
+                        print("pressed: CTRL + S")
+                        self.save_graph()
 
 
             clock.tick(50)
@@ -145,8 +161,6 @@ class Graph(Drawable):
         start_point = Point(x1, y1, 0, self)
         end_point = Point(x2, y2, 0, self)
         self.lines.append(Line(self, start_point, end_point))
-        self.points.append(start_point)
-        self.points.append(end_point)
 
 
     def draw_lines(self):
@@ -187,6 +201,24 @@ class Graph(Drawable):
         s = simpledialog.askstring("Add point/line", "Enter (x,y) - Coordinate  or  (x1,y1) (x2,y2) - A line will connect between those two points")
         if s: print(self.parse_input_string_simple(s))
 
+
+    def to_json(self):
+        return {"points":[point.to_json() for point in self.points], "lines":[line.to_json() for line in self.lines]}
+
+    def save_graph(self):
+        with open("graph.json", mode="w", encoding="utf-8") as write_file:
+            json.dump(self.to_json(), write_file)
+    @classmethod
+    def load_graph(cls):
+        if not os.path.exists("graph.json"):
+            return Graph(width= WINSIZE[0], height = WINSIZE[1])
+        with open("graph.json", mode="r", encoding="utf-8") as read_file:
+            data = json.load(read_file)
+            graph = Graph(width= WINSIZE[0], height = WINSIZE[1])
+            graph.points = [Point.from_json(point,graph) for point in data['points']]
+            graph.lines = [Line.from_json(line,graph) for line in data['lines']]
+
+            return graph
 
 
 
