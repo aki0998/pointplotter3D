@@ -3,6 +3,8 @@ import re
 import pygame as pg
 from models.point import Point
 from models.line import Line
+import math
+from utils import display_text
 
 try:
     import tkinter as tk
@@ -33,6 +35,40 @@ class Graph(Drawable):
     def draw_axes(self):
         pg.draw.line(self.screen, (0, 0, 0),(self.width/2 , 0), (self.width/2 , self.height))
         pg.draw.line(self.screen, (0, 0, 0),( 0,self.height/2), (self.width , self.height/2))
+        # ---- dynamic X labels across screen at any zoom ----
+        ppu = self.pixels_per_unit
+        axis_y = self.height // 2
+
+        # visible world range in x
+        x_min = math.floor(-self.width / (2 * ppu))
+        x_max = math.ceil(self.width / (2 * ppu))
+
+        # keep labels ~80 pixels apart -> simple integer step
+        min_px_gap = 80
+        step_x = max(1, math.ceil(min_px_gap / ppu))
+
+        for x in range(int(x_min), int(x_max) + 1, int(step_x)):
+            x_pix, _ = self.coords_to_pos(x, 0)
+            # small tick mark on the axis
+            pg.draw.line(self.screen, (120, 120, 120), (x_pix, axis_y - 4), (x_pix, axis_y + 4), 1)
+            # label just BELOW the x-axis so it doesn't sit on the line
+            display_text(str(x), (x_pix, axis_y + 8), self.screen, size=14, bg=None, anchor="midtop")
+
+        # ---- dynamic Y labels across screen at any zoom ----
+        axis_x = self.width // 2
+
+        # visible world range in y
+        y_min = math.floor(-self.height / (2 * ppu))
+        y_max = math.ceil(self.height / (2 * ppu))
+
+        step_y = max(1, math.ceil(min_px_gap / ppu))
+
+        for y in range(int(y_min), int(y_max) + 1, int(step_y)):
+            _, y_pix = self.coords_to_pos(0, y)
+            # small tick mark on the axis
+            pg.draw.line(self.screen, (120, 120, 120), (axis_x - 4, y_pix), (axis_x + 4, y_pix), 1)
+            # label just LEFT of the y-axis so it doesn't sit on the line
+            display_text(str(y), (axis_x - 8, y_pix), self.screen, size=14, bg=None, anchor="midright")
 
     def draw(self):
         for point in self.points:
