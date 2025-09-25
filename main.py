@@ -3,6 +3,7 @@
 "Creating a basic 2D environment for now to create a point "
 import pygame as pg
 
+
 from config import WINSIZE, WINCENTER
 from graph import Graph
 from models.point import Point

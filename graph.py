@@ -26,7 +26,7 @@ class Graph(Drawable):
     def __init__(self, points = None, lines = None, width = 1000,height = 1000,pixels_per_unit = 10):
         self.points = points or []
         self.lines = lines or []
-        self.screen= pg.display.set_mode((width,height))
+        self.screen= pg.display.set_mode((width,height),pg.RESIZABLE)
         self.width = width
         self.height = height
         self.pixels_per_unit = pixels_per_unit #this represents how many pixels will be one unit in the graph
