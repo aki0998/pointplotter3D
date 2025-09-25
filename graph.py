@@ -135,7 +135,13 @@ class Graph(Drawable):
                     elif e.key == pg.K_s and pg.key.get_mods() & pg.KMOD_CTRL:
                         print("pressed: CTRL + S")
                         self.save_graph()
-
+                elif e.type == pg.VIDEORESIZE:
+                    # There's some code to add back window content here.
+                    self.screen = pg.display.set_mode((e.w, e.h),
+                                                      pg.RESIZABLE)
+                    print(e.w,e.h)
+                    self.width = e.w
+                    self.height = e.h
 
             clock.tick(50)
         pg.quit()
