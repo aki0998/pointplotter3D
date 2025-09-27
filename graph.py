@@ -35,18 +35,26 @@ class Graph(Drawable):
         self.max_zoom = 10
         self.min_zoom = 0.1
         self.default_ppu = pixels_per_unit
+        self.mouse_click_pos = None
+        self.pan = False
+        self.pan_x = 0
+        self.pan_y = 0
 
 
     def draw_axes(self):
-        pg.draw.line(self.screen, (0, 0, 0),(self.width/2 , 0), (self.width/2 , self.height))
-        pg.draw.line(self.screen, (0, 0, 0),( 0,self.height/2), (self.width , self.height/2))
+
+        origin_x, origin_y = self.coords_to_pos(0,0)
+        pg.draw.line(self.screen, (0, 0, 0),(origin_x , 0), (origin_x, self.height))
+        pg.draw.line(self.screen, (0, 0, 0),( 0,origin_y), (self.width , origin_y))
         # ---- dynamic X labels across screen at any zoom ----
         ppu = self.pixels_per_unit
-        axis_y = self.height // 2
+        axis_y = origin_y
+        dx,dy = self.pan_offset()
 
         # visible world range in x
-        x_min = math.floor(-self.width / (2 * ppu))
-        x_max = math.ceil(self.width / (2 * ppu))
+        x_min = math.floor((-self.width - dx) / ppu)
+        x_max = math.ceil((self.width - dx) / ppu)
+
 
         # keep labels ~80 pixels apart -> simple integer step
         min_px_gap = 80
@@ -60,11 +68,11 @@ class Graph(Drawable):
             display_text(str(x), (x_pix, axis_y + 8), self.screen, size=14, bg=None, anchor="midtop")
 
         # ---- dynamic Y labels across screen at any zoom ----
-        axis_x = self.width // 2
+        axis_x = origin_x
 
         # visible world range in y
-        y_min = math.floor(-self.height / (2 * ppu))
-        y_max = math.ceil(self.height / (2 * ppu))
+        y_min = math.floor((-self.height + dy) / ppu)
+        y_max = math.ceil((self.height + dy)/ ppu)
 
         step_y = max(1, math.ceil(min_px_gap / ppu))
 
@@ -105,23 +113,21 @@ class Graph(Drawable):
                     break
                 elif e.type == pg.MOUSEBUTTONDOWN:
                     if e.button == 1:
-                        for point in self.points:
-                            if point.mouse_intersection():
+                        self.handle_left_click()
+                    elif e.button == 3:
+                        self.handle_right_click()
 
-                                self.selected_point = point
-                                print("point ",point," has been selected")
-                                break
-                        for line in self.lines:
-                            if line.start_point.mouse_intersection():
-                                self.selected_point = line.start_point
-                                # print("point ", point, " has been selected")
-                            if line.end_point.mouse_intersection():
-                                self.selected_point = line.end_point
-                                # print("point ", point, " has been selected")
+
 
                 elif e.type == pg.MOUSEBUTTONUP:
                     if e.button == 1:
                         self.selected_point = None
+                    if e.button == 3:
+                        dx, dy = self.pan_offset()
+                        self.pan_x = dx
+                        self.pan_y = dy
+                        self.pan = False
+                        self.mouse_click_pos = None
                 elif e.type == pg.MOUSEWHEEL:
                     if e.y == 1:#
                         if self.pixels_per_unit < self.default_ppu*self.max_zoom:
@@ -130,6 +136,8 @@ class Graph(Drawable):
                         if self.pixels_per_unit > self.default_ppu*self.min_zoom:
                             self.pixels_per_unit *= 0.9
                 elif e.type == pg.KEYDOWN:
+                    if e.key == pg.K_r:
+                        self.reset_view()
                     if e.key == pg.K_i:  # NEW
                         self.prompt_for_input()
                     elif e.key == pg.K_s and pg.key.get_mods() & pg.KMOD_CTRL:
@@ -146,6 +154,20 @@ class Graph(Drawable):
             clock.tick(50)
         pg.quit()
 
+    def handle_left_click(self):
+        for point in self.points:
+            if point.mouse_intersection():
+                self.selected_point = point
+                print("point ", point, " has been selected")
+                break
+        for line in self.lines:
+            if line.start_point.mouse_intersection():
+                self.selected_point = line.start_point
+                # print("point ", point, " has been selected")
+            if line.end_point.mouse_intersection():
+                self.selected_point = line.end_point
+                # print("point ", point, " has been selected")
+
     def update_selected_point(self):
         if self.selected_point:
             self.selected_point.set_coordinates(*self.convert_pos_to_coords(*pg.mouse.get_pos()))
@@ -156,12 +178,26 @@ class Graph(Drawable):
         self.points.append(point)
 
     def convert_pos_to_coords(self, a, b):
-        x = (a - self.width/2)/self.pixels_per_unit
-        y = (self.height/2 - b)/self.pixels_per_unit
+        x = ((a-self.pan_x) - self.width/2)/self.pixels_per_unit
+        y = (self.height/2 - (b-self.pan_y))/self.pixels_per_unit
+
         return x,y
 
     def coords_to_pos(self, x, y):
-        return self.width // 2 + x * self.pixels_per_unit, self.height // 2 - y * self.pixels_per_unit
+        dx, dy = self.pan_offset()
+        screen_x =  self.width // 2 + x * self.pixels_per_unit + dx
+        screen_y =  self.height // 2 - y * self.pixels_per_unit + dy
+
+        return screen_x, screen_y
+
+    def pan_offset(self):
+        dx = self.pan_x
+        dy = self.pan_y
+        mouse_x, mouse_y = pg.mouse.get_pos()
+        if self.mouse_click_pos and self.pan:
+            dx += mouse_x - self.mouse_click_pos[0]
+            dy += mouse_y - self.mouse_click_pos[1]
+        return dx, dy
 
     def add_line_segment(self, x1, y1, x2, y2):
         start_point = Point(x1, y1, 0, self)
@@ -225,6 +261,19 @@ class Graph(Drawable):
             graph.lines = [Line.from_json(line,graph) for line in data['lines']]
 
             return graph
+
+    def handle_right_click(self):
+        self.mouse_click_pos = pg.mouse.get_pos()
+        self.pan = True
+
+
+        pass
+
+    def reset_view(self):
+        self.pan_x = self.pan_y = 0
+        self.pixels_per_unit = self.default_ppu
+
+        pass
 
 
 
